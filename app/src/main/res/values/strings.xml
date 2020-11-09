@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Inventorius</string>
+    <string name="action_settings">Prisijungimo nustatymai</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="ip_text">SQL Serverio adresas (pvz. 10.12.0.50)</string>
+    <string name="sql_vardas">SQL Serverio vartotojo vardas</string>
+    <string name="sql_password">Slaptažodis</string>
+    <string name="connect">Prisijungti</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">SQL Server kredencialai</string>
+
+    <!-- Messages Preferences -->
+    <string name="username">Vartotojo vardas</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="db_name">DB pavadinimas (pvz. Inventorizacija)</string>
+    <string name="trying_to_connect">Bandau jungtis prie SQL serverio...</string>
+    <string name="patikrink_parametrus">Patikrink SQL serverio prisijungimo parametrus</string>
+</resources>
