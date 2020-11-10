@@ -1,24 +1,29 @@
 package com.rimukas.inventorius
 
-import android.content.Context
+//import android.R
+import com.rimukas.inventorius.R
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.preference.PreferenceManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.spinner.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.sql.*
-import java.util.*
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
 import kotlin.properties.Delegates
+
 
 class MainActivity : AppCompatActivity() {
     var connection: Connection? = null
@@ -37,33 +42,22 @@ class MainActivity : AppCompatActivity() {
                 val c = connection!!.catalog
                 Snackbar.make(view, "Connected $c", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
+
             }
 
+            val fragment: Fragment = ResultFragment()
+
+            val fm: FragmentManager = supportFragmentManager
+            val transaction: FragmentTransaction = fm.beginTransaction()
+           transaction.replace(R.id.fragment_placeholder, fragment)
+            transaction.commit()
+
         }
-
-//        test_button.setOnClickListener {
-//            if(connection != null){
-//                Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show()
-//            }
-//        }
-
-
-
-
-
-
-
-        //pref.edit().putString("ddd", "ddd")
-      //  if(txt == "") {
-      //      Toast.makeText(this, "einu i settings", Toast.LENGTH_SHORT).show()
-       //     startSettingsActivity()
-     //   }
-
     }
+
 
     override fun onResume() {
         super.onResume()
-
         if(connection == null){
             GlobalScope.launch{
                 connectToSQLServer()
@@ -80,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     suspend fun connectToSQLServer() = withContext(Dispatchers.IO) {
 
         val pref = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
-        val username = pref.getString("username","")
+        val username = pref.getString("username", "")
         val password = pref.getString("password", "")
         val ip = pref.getString("ip", "")
         val db = pref.getString("db", "")
@@ -88,22 +82,18 @@ class MainActivity : AppCompatActivity() {
         val driver = "net.sourceforge.jtds.jdbc.Driver"
         Class.forName(driver).newInstance()
         val dbURL = "jdbc:jtds:sqlserver://${ip}/${db};user=${username};password=${password}"
-        println("-------------- trying to connect to SQL....")
-        //val psw = "uaadmin/1"
 
         showErrorMsg("") // išvalo rodomą klaidos pranešimą
 
         try{
-            connection = DriverManager.getConnection(dbURL)    //("jdbc:jtds:sqlserver://10.12.0.51:1433/Inventorizacija;user=ua;password=a")//(dbURL)
+            connection = DriverManager.getConnection(dbURL)
         }
         catch (ex: SQLException){
             ex.message?.let { showErrorMsg(it) }
-            println("---------------------------- Connection failed")
          //   startSettingsActivity()
         } finally {
             if(connection != null){
-               hideSpinner()
-            }
+               hideSpinner()            }
         }
 
 
@@ -122,11 +112,11 @@ class MainActivity : AppCompatActivity() {
  */
     }
 
-    suspend fun showErrorMsg(msg: String) = withContext(Dispatchers.Main){
+    private suspend fun showErrorMsg(msg: String) = withContext(Dispatchers.Main){
         errorMsg.text = msg
     }
 
-    suspend fun hideSpinner() = withContext(Dispatchers.Main){
+    private suspend fun hideSpinner() = withContext(Dispatchers.Main){
         spinner.visibility = View.GONE
     }
 

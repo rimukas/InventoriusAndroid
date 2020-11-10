@@ -20,6 +20,11 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 <include layout="@layout/spinner"/>
+    <FrameLayout
+        android:id="@+id/fragment_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

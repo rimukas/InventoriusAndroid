@@ -32,4 +32,10 @@
     <string name="db_name">DB pavadinimas (pvz. Inventorizacija)</string>
     <string name="trying_to_connect">Bandau jungtis prie SQL serverio...</string>
     <string name="patikrink_parametrus">Patikrink SQL serverio prisijungimo parametrus</string>
+    <string name="inventorise">Inventorizuoti</string>
+    <string name="invnr_header">Inv. Nr.</string>
+    <string name="iranga_header">Įranga</string>
+    <string name="darbuotojas_header">Atsakingas asmuo</string>
+    <string name="data_header">Įsigijimo data</string>
+    <string name="pastabos_header">Pastabos</string>
 </resources>

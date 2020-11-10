@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.rimukas.inventorius.FirstFragment"
+        android:name="com.rimukas.inventorius.ResultFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_result">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"

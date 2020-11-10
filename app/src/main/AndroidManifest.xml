@@ -14,12 +14,13 @@
         android:theme="@style/Theme.Inventorius">
         <activity
             android:name=".SettingsActivity"
+            android:theme="@style/Theme.AppCompat"
             android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_settings"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Inventorius.NoActionBar">
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
