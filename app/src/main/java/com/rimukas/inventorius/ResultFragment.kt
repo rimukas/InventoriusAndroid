@@ -7,7 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.fragment.findNavController
+//import kotlinx.android.synthetic.main.camera_fragment.*
+import kotlinx.android.synthetic.main.fragment_result.*
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -15,11 +19,13 @@ import androidx.navigation.fragment.findNavController
 class ResultFragment : Fragment() {
     val PREFS_NAME = "sharedPreffs"
     var myPref: SharedPreferences? = null
+    lateinit var strtext: String
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+        strtext = arguments?.get("invnr").toString() //.getString("edttext")
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_result, container, false)
     }
@@ -27,8 +33,11 @@ class ResultFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<Button>(R.id.button_first).setOnClickListener {
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+        txt_invnr.text = strtext
+
+        view.findViewById<Button>(R.id.btn_inventorizacija).setOnClickListener {
+           // findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+            findNavController().navigate(R.id.MainActivity)
         }
 
 

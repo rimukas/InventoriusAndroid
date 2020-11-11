@@ -1,59 +1,212 @@
 package com.rimukas.inventorius
 
 //import android.R
-import com.rimukas.inventorius.R
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.OnFocusChangeListener
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
+import com.budiyev.android.codescanner.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.spinner.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.camera_layout.*
+import kotlinx.android.synthetic.main.fragment_result.*
+import kotlinx.android.synthetic.main.spinner_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.SQLException
-import kotlin.properties.Delegates
+import java.sql.*
+import java.sql.Date
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var codeScanner: CodeScanner
+    private val MY_CAMERA_PERMISSION_CODE = 1234
     var connection: Connection? = null
+    private var dataFromCamera: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
+       // setSupportActionBar(findViewById(R.id.toolbar))
 
+        spinner.visibility = View.VISIBLE
+        fragment_result.visibility = View.GONE
+        /*
         var errorChanged: String by Delegates.observable("") { _, oldValue, newValue ->
                 errorMsg.text = newValue
         }
-
-        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-            if(connection != null){
-                val c = connection!!.catalog
-                Snackbar.make(view, "Connected $c", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-
+*/
+        btn_inventorizacija.setOnClickListener{
+            //val date: Date = Calendar.getInstance().time as Date
+            val date = Date(Calendar.getInstance().timeInMillis)
+            // run corutine
+            GlobalScope.launch {
+                updateSQLTable(dataFromCamera.toString(), date)
             }
 
-            val fragment: Fragment = ResultFragment()
+            fragment_result.visibility = View.GONE
+            camera.visibility = View.VISIBLE
+            checkPermission()
+        }
 
-            val fm: FragmentManager = supportFragmentManager
-            val transaction: FragmentTransaction = fm.beginTransaction()
-           transaction.replace(R.id.fragment_placeholder, fragment)
-            transaction.commit()
+                btn_back.setOnClickListener {
+                    fragment_result.visibility = View.GONE
+                    camera.visibility = View.VISIBLE
+                    checkPermission()
+                }
 
+        btn_hide_keyboard.setOnClickListener{
+        // tik paslepia klaviatūrą
+            val view: View = findViewById(R.id.txt_pastabos)
+            hideKeyboard(view)
+        }
+
+        // neveikia, nes neišėjo permesti fokuso ant kokio nors kito View
+        txt_pastabos.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            println("---------------- focus change") // DEBUG
+            if (!hasFocus) {
+                // code to execute when EditText loses focus
+                hideKeyboard(v)
+            }
+        }
+
+
+        val scannerView = findViewById<CodeScannerView>(R.id.scanner_view)
+
+        codeScanner = CodeScanner(this, scannerView)
+
+        // Parameters (default values)
+        codeScanner.camera = CodeScanner.CAMERA_BACK // or CAMERA_FRONT or specific camera id
+        codeScanner.formats = CodeScanner.ALL_FORMATS // list of type BarcodeFormat,
+        // ex. listOf(BarcodeFormat.QR_CODE)
+        codeScanner.autoFocusMode = AutoFocusMode.SAFE // or CONTINUOUS
+        codeScanner.scanMode = ScanMode.SINGLE // or CONTINUOUS or PREVIEW
+        codeScanner.isAutoFocusEnabled = true // Whether to enable auto focus or not
+        codeScanner.isFlashEnabled = false // Whether to enable flash or not
+
+        // Callbacks
+        codeScanner.decodeCallback = DecodeCallback {
+            runOnUiThread {
+                dataFromCamera = it.text
+                GlobalScope.launch {
+                    executeSQL(dataFromCamera.toString())
+                }
+
+
+                /*
+                // pass arguments to Fragment
+                val bundle = Bundle()
+                bundle.putString("invnr", it.text)
+
+                val fragment: Fragment = ResultFragment()
+                fragment.arguments = bundle
+                val fm: FragmentManager = supportFragmentManager
+                val transaction: FragmentTransaction = fm.beginTransaction()
+                transaction.replace(R.id.fragment_placeholder, fragment)
+                transaction.commit()
+                */
+
+            }
+        }
+        codeScanner.errorCallback = ErrorCallback { // or ErrorCallback.SUPPRESS
+            runOnUiThread {
+                Toast.makeText(this, "Camera initialization error: ${it.message}",
+                        Toast.LENGTH_LONG).show()
+            }
+        }
+
+        scannerView.setOnClickListener {
+            codeScanner.startPreview()
+        }
+
+    }
+
+
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private suspend fun updateSQLTable(id: String, dateTime: Date) = withContext(Dispatchers.IO) {
+            val query = "UPDATE iranga SET inv_data='$dateTime', pastabos='${txt_pastabos.text}' WHERE invsernr='$id'"
+            val statement: Statement = connection!!.createStatement()
+            //val resultSet: ResultSet = statement.executeQuery(query)
+        statement.executeUpdate(query)
+
+    }
+
+    // run on IO Thread
+    private suspend fun executeSQL(cameraString: String) = withContext(Dispatchers.IO) {
+        val query = "" +
+                "SELECT ir.invsernr, ir.iranga, ir.[data], ir.ilgalaikis, pr.darbuotojas, ir.pastabos, ir.inv_data\n" +
+                "FROM iranga ir\n" +
+                "INNER JOIN priklauso pr ON pr.invsernr=ir.invsernr\n" +
+                "WHERE ir.invsernr='$cameraString'"
+        val statement: Statement = connection!!.createStatement()
+        //val resultSet: ResultSet = statement.executeQuery(query)
+        val resultSet: ResultSet = statement.executeQuery(query)
+        showSQLresult(resultSet)
+    }
+
+    // run on Main Thread
+    private suspend fun showSQLresult(resultSet: ResultSet) = withContext(Dispatchers.Main) {
+        if(resultSet.next()){
+            camera.visibility = View.GONE
+            fragment_result.visibility = View.VISIBLE
+
+            // išvalom teksto laukelius nuo praeitų duomenų
+            txt_invnr.text = "-"
+            txt_iranga.text = "-"
+            txt_darbuotojas.text = "-"
+            txt_data.text= "-"
+            txt_invdata.text = "-"
+            txt_pastabos.setText("")
+            // ---------------------
+
+            txt_invnr.text = resultSet.getString("invsernr")
+            txt_iranga.text = resultSet.getString("iranga")
+            txt_darbuotojas.text = resultSet.getString("darbuotojas")
+            resultSet.getString("data")?.let {txt_data.text=it  }
+            resultSet.getDate("inv_data")?.let { txt_invdata.text = it.toString() }
+            txt_pastabos.setText(resultSet.getString("pastabos"))
         }
     }
+
+
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode==MY_CAMERA_PERMISSION_CODE&&grantResults.isNotEmpty()&&grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            codeScanner.startPreview()
+        } else {
+            Snackbar.make(fragment_placeholder, "Negaliu skenuoti kol nebus duotas kameros leidimas", Snackbar.LENGTH_LONG).show()
+           // Toast.makeText(this, "Negaliu skenuoti kol nebus duotas kameros leidimas", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_CAMERA_PERMISSION_CODE)
+        } else
+            codeScanner.startPreview()
+    }
+
+
 
 
     override fun onResume() {
@@ -63,6 +216,12 @@ class MainActivity : AppCompatActivity() {
                 connectToSQLServer()
             }
         }
+        checkPermission()
+    }
+
+    override fun onPause() {
+        codeScanner.releaseResources()
+        super.onPause()
     }
 
     private fun startSettingsActivity(){
@@ -71,7 +230,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    suspend fun connectToSQLServer() = withContext(Dispatchers.IO) {
+    private suspend fun connectToSQLServer() = withContext(Dispatchers.IO) {
 
         val pref = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
         val username = pref.getString("username", "")
@@ -95,21 +254,6 @@ class MainActivity : AppCompatActivity() {
             if(connection != null){
                hideSpinner()            }
         }
-
-
-
-/*
-        val query = "SELECT * FROM iranga"
-        val statement: Statement = connection.createStatement()
-        val resultSet: ResultSet = statement.executeQuery(query)
-        println("----------------: $resultSet")
-        while (resultSet.next()){
-            print(resultSet.getString("invsernr") + " -> " + resultSet.getString("iranga") + " - " + resultSet.getString("pastabos"))
-            println()
-
-        }
-
- */
     }
 
     private suspend fun showErrorMsg(msg: String) = withContext(Dispatchers.Main){
@@ -118,6 +262,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun hideSpinner() = withContext(Dispatchers.Main){
         spinner.visibility = View.GONE
+        camera.visibility = View.VISIBLE
     }
 
 

@@ -4,16 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_result"
     android:layout_width="match_parent"
+    android:clickable="true"
+    android:focusable="true"
     android:layout_height="match_parent"
+    android:importantForAccessibility="yes"
     tools:context=".ResultFragment">
 
     <Button
-        android:id="@+id/button_first"
-        android:layout_width="wrap_content"
+        android:id="@+id/btn_inventorizacija"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:drawableStart="@drawable/ic_baseline_beenhere_24"
+        android:drawableTint="@android:color/holo_green_dark"
         android:text="@string/inventorise"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btn_back"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_pastabos" />
 
@@ -22,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="8dp"
         android:text="@string/invnr_header"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,9 +41,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:textSize="16sp"
         android:layout_marginTop="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:importantForAccessibility="yes"
         android:text="@string/invnr_header"
+        android:textSize="16sp"
+        android:textColor="@color/accent_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_invnr_header" />
 
@@ -58,6 +70,7 @@
         android:layout_marginTop="4dp"
         android:text="@string/iranga_header"
         android:textSize="16sp"
+        android:textColor="@color/accent_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_iranga_header" />
 
@@ -80,6 +93,7 @@
         android:layout_marginTop="4dp"
         android:text="@string/darbuotojas_header"
         android:textSize="16sp"
+        android:textColor="@color/accent_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_darbuotojas_header" />
 
@@ -102,8 +116,33 @@
         android:layout_marginTop="4dp"
         android:text="@string/data_header"
         android:textSize="16sp"
+        android:textColor="@color/accent_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_data_header" />
+
+    <TextView
+        android:id="@+id/txt_invdata_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/invdata_header"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_data" />
+
+    <TextView
+        android:id="@+id/txt_invdata"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/invdata_header"
+        android:textSize="16sp"
+        android:textColor="@color/accent_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_invdata_header" />
+
 
     <TextView
         android:id="@+id/txt_pastabos_header"
@@ -114,20 +153,49 @@
         android:text="@string/pastabos_header"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_data" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_invdata" />
 
-    <TextView
+    <EditText
         android:id="@+id/txt_pastabos"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:autofillHints="@string/pastabos_header"
+        android:hint="@string/pastabos_header"
+        android:inputType="text"
         android:text="@string/pastabos_header"
         android:textSize="16sp"
+        android:textColor="@color/accent_color"
+        app:layout_constraintEnd_toStartOf="@+id/btn_hide_keyboard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_pastabos_header" />
 
+    <Button
+        android:id="@+id/btn_back"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_baseline_arrow_back_ios_24"
+        android:drawableTint="@android:color/holo_red_dark"
+        android:text="@string/back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_inventorizacija"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/btn_inventorizacija"
+        app:layout_constraintTop_toBottomOf="@+id/btn_inventorizacija" />
 
+    <Button
+        android:id="@+id/btn_hide_keyboard"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:drawableLeft="@drawable/ic_baseline_check_24"
+        android:drawableTint="@android:color/holo_green_dark"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="@+id/txt_pastabos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_pastabos" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
